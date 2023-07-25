@@ -8,7 +8,7 @@ import GlobalStyle from './globalStyles';
 
 const TextArea = styled.textarea`
   width: 100%;
-  height: 150px;
+  height: 100px;
   margin-bottom: 20px;
   padding: 10px;
   font-size: 16px;
@@ -17,7 +17,7 @@ const TextArea = styled.textarea`
 `;
 
 const SubmitButton = styled.button`
-  margin-bottom: 20px;
+  // margin-bottom: 20px;
   padding: 10px 20px;
   font-size: 16px;
   border-radius: 5px;
@@ -47,15 +47,33 @@ const Loader = styled.div`
 
 const AnimatedArea = styled.div`
   width: 80%;
-  height: calc(100vh - 300px); /* Full height minus 20px top and bottom margin */
-  margin: 20px auto; /* Vertical margin: 20px, Horizontal margin: auto */
+  height: calc(100vh - 240px); /* Full height minus 20px top and bottom margin */
+  margin: 12px auto; /* Vertical margin: 20px, Horizontal margin: auto */
   background: #282a36;
   box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2); 
   border-radius: 5px;
-  padding: 20px;
+  padding: 0 12px;
   overflow: auto; /* Add scrollbar if content is too tall */
   box-sizing: border-box; /* Include padding and border in element's total width and height */
   color: #f8f8f2;
+`;
+
+
+const TrafficLights = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  height: 25px;
+`;
+
+const Light = styled.span`
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: ${props => props.color};
 `;
 
 
@@ -113,18 +131,10 @@ const CommentSpan = styled.span`
   color: #5a965a;
 `;
 
-// purple (return): #c487be
-// def blue: #4193d3
-// comment #5a965a
-// modules / imports: #52C9B1
-// variable: #9DDDFC
-
-
 function App() {
   const [code, setCode] = useState('');
-  const [animatedCode, setAnimatedCode] = useState(''); // new state variable
-  const [loading, setLoading] = useState(false); // new state variable
-  const [animatedHeight, setAnimatedHeight] = useState('auto');
+  const [animatedCode, setAnimatedCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
 
   const handleSubmit = async () => {
@@ -132,12 +142,8 @@ function App() {
     try {
       const response = await axios.post('http://localhost:5000/convert', { code });
       let html = response.data.html;
-      html = html.replace(/```html|```/g, ""); // remove ```html and ```
-
-      // Count the number of lines in the code
-      const lineCount = (code.match(/\n/g) || '').length + 1;
-      // Set the height of the animated window (you might need to adjust the multiplier)
-      setAnimatedHeight(lineCount * 1.5 + 'em');
+      // remove "```html" if it's at the start and "```" if it's at the end
+      html = html.replace(/^```html\n?|```\n?$/g, "");
 
       setAnimatedCode(html);
       console.log(html)
@@ -245,9 +251,14 @@ function App() {
         placeholder="Paste code here"
       />
       <SubmitButton onClick={handleSubmit}>Submit</SubmitButton>
-      {loading ? <Loader /> : null}
-      <AnimatedArea height={animatedHeight}>
-        {loading ? <p>Loading...</p> : lines}
+      {loading ? "Loading" : null}
+      <AnimatedArea>
+        <TrafficLights>
+          <Light color="#FF605C" />
+          <Light color="#FFBD44" />
+          <Light color="#00CA4E" />
+        </TrafficLights>
+        {!loading && lines}
       </AnimatedArea>
     </div>
   );
